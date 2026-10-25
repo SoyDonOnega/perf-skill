@@ -2,12 +2,18 @@
 
 Goal: components render only when their visible output changes.
 
+## Lighthouse audits (13.x)
+
+`total-blocking-time`, `long-tasks`, `mainthread-work-breakdown`, `bootup-time`, `forced-reflow-insight`, `dom-size-insight`. (`inp-breakdown-insight` needs an interaction; a page-load run leaves it empty.)
+
 ## Measure first
 
-- React: React DevTools Profiler (record a flow, read commit count and render time per component), or wrap the suspect tree in `<Profiler id onRender>` and log counts to the console. Run against a production build with profiling enabled (`react-dom/profiling`, or the framework's profiling flag).
-- Vue: Vue DevTools performance timeline; `app.config.performance = true`.
-- Any framework: a Performance trace of the interaction (long tasks, scripting time). In the lab, Total Blocking Time is the proxy.
-- Save counts as `.perf/renders-<flow>.json` (component → renders per interaction) before and after.
+- **No code change (always available, the only route with `--audit`):** the audits above from the baseline files, plus a Performance trace of the key interaction in a browser (long tasks, scripting time). In the lab, Total Blocking Time is the proxy.
+- **Render counts (needs a code change, so only in step 7, as its own reverted-afterwards step):**
+  - React: React DevTools Profiler (record a flow, read commit count and render time per component), or wrap the suspect tree in `<Profiler id onRender>` and log counts. Use a production build with profiling enabled (alias `react-dom/client` to `react-dom/profiling`, or the framework's profiling flag).
+  - Vue: Vue DevTools performance timeline; `app.config.performance = true`.
+  - Save counts as `.perf/renders-<flow>.json` (component → renders per interaction) before and after.
+- **"No findings" without counting renders:** declare the area clean when TBT < 200 ms on the mobile preset, no long task over 100 ms during the key interaction, no `forced-reflow-insight` failure, and no rendered list over ~100 items. Say that render counts were not measured.
 
 ## Common causes, by frequency
 

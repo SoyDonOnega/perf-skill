@@ -2,11 +2,16 @@
 
 Goal: fewer requests, smaller responses, nothing fetched twice, nothing waiting on something it does not need.
 
+## Lighthouse audits (13.x)
+
+`network-dependency-tree-insight` (request chains), `render-blocking-insight`, `cache-insight`, `document-latency-insight` (redirects, server response, compression of the document), `modern-http-insight`, `redirects`, `server-response-time`. Raw list: `network-requests` in the `.lh.json` report.
+
 ## Measure first
 
-- The saved Lighthouse report: `network-requests`, the critical request chain, render-blocking resources, cache policy of static assets.
+- The audits above, from `findings` in the measurement file or the `.lh.json` report.
 - In a browser: the network log of the key flow. Count requests, find duplicates (same URL or same query fired twice), and draw the waterfall (which request waits on which).
 - Server response time (TTFB) for the document and the main API calls.
+- **Caching and compression are a deployment property.** Local preview servers usually send `no-cache` and their own compression, so `cache-insight` passes or finds nothing on localhost. Check the public site read-only: `curl -sI <public URL of a hashed asset>` and `curl -sI -H 'Accept-Encoding: br, gzip' <public URL>`. Findings from this are marked "Verifiable by compare: no" and get an after-deploy check instead.
 
 ## Common causes, by frequency
 
@@ -25,7 +30,8 @@ Goal: fewer requests, smaller responses, nothing fetched twice, nothing waiting 
 - Paginate, select fields, or add a lighter endpoint (needs the user's OK: it changes an API).
 - `Cache-Control: public, max-age=31536000, immutable` for hashed assets; `stale-while-revalidate` for data that may be slightly stale.
 - `preconnect` to required third-party origins; `preload` the LCP resource.
-- Turn on compression in the server or CDN config the repo controls.
+- Turn on compression in the server or CDN config the repo controls (for example `headers` in `vercel.json`, `_headers` on Netlify, the server's config).
+- `cache: "no-store"` or cache-busting query strings in fetch calls may be deliberate (content published from elsewhere must show at once). Ask before changing them.
 
 ## Pitfalls
 

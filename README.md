@@ -4,7 +4,7 @@ Agent skill `/perf`: make a web app faster by measurement — baseline, one chan
 
 ## What it does
 
-Builds the app for production, serves it locally and takes a Lighthouse baseline (median of 3 runs) plus build size. Audits five areas — unnecessary renders, bundle size and lazy loading, requests and caching, slow queries and N+1, images/fonts/third-party scripts — and returns ranked findings with evidence. After you choose which to apply, it makes one change at a time on a `perf/<date>` branch, rebuilds, runs the tests, re-measures, and keeps the change only if the targeted metric improved with no regression. Ends with a before/after report. It never deploys, pushes or touches production.
+Reads the stack and the project's own constraints (README, handoff and agent notes), builds the app for production, serves it locally on a fixed port and takes a Lighthouse baseline (median of 3 runs, full report kept, failing audits summarised) plus build size. Audits five areas — unnecessary renders, bundle size and lazy loading, requests and caching, slow queries and N+1, images/fonts/third-party scripts — and returns ranked findings with evidence. After you choose which to apply, it makes one change at a time on a `perf/<date>` branch, rebuilds, runs the tests, re-measures, and keeps the change only if the targeted metric improved with no regression. Ends with a before/after report. It never deploys, pushes or touches production.
 
 ## Usage
 
@@ -29,8 +29,8 @@ From OneStack: `./sync-install.sh` — or copy this folder as `<skills dir>/perf
 ## Layout
 
 - `SKILL.md` — the skill: the measure → change → re-measure loop, rules, output templates.
-- `scripts/measure.py` — `run` (Lighthouse, median of N runs), `bundle` (build output size by type), `compare` (before/after table; exit 1 on regression). Standard library only.
-- `references/renders.md`, `bundle.md`, `network.md`, `db.md`, `assets.md` — per-area checklists: how to measure, common causes, fixes, pitfalls.
+- `scripts/measure.py` — `run` (Lighthouse, median run of N, full report kept as `.lh.json`, warnings, failing audits, observed LCP and LCP element), `bundle` (generated output size by type plus largest files), `compare` (before/after table; exit 1 on regression). Standard library only.
+- `references/renders.md`, `bundle.md`, `network.md`, `db.md`, `assets.md` — per-area checklists: Lighthouse 13 audit IDs, how to measure, common causes, fixes, pitfalls.
 
 ## License
 

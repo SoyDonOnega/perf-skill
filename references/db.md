@@ -4,9 +4,13 @@ Goal: each endpoint runs a small, fixed number of fast queries.
 
 Applies only when the repo has a data layer (ORM, query builder, raw SQL). Never run against a production database; use the local or test database with seed data large enough to show the problem.
 
+## Lighthouse audits (13.x)
+
+Only indirect: `server-response-time` and `document-latency-insight` for server-rendered pages. Lighthouse cannot see queries; the numbers below are the baseline.
+
 ## Measure first
 
-- Turn on query logging for one request of each key endpoint, and save query count and total query time to `.perf/db-<endpoint>.json`:
+- Turn on query logging (an environment variable or local config, not a committed change; with `--audit`, only if it needs no project file change) for one request of each key endpoint, and save query count and total query time to `.perf/db-<endpoint>.json`:
   - Prisma: `log: ['query']`; Drizzle: `logger: true`; TypeORM: `logging: true`; Sequelize: `logging`; Django: `connection.queries` or django-debug-toolbar; Rails: the request log or `bullet`; SQLAlchemy: `echo=True`; Laravel: `DB::listen`.
 - For each slow query: `EXPLAIN ANALYZE` (Postgres), `EXPLAIN` (MySQL, SQLite). Look for sequential scans on large tables, high row estimates, sorts on disk.
 - Endpoint timing: server response time for the same request before and after.
