@@ -2,11 +2,15 @@
 
 Goal: the first page loads only the code it needs.
 
+## Lighthouse audits (13.x)
+
+`unused-javascript`, `unminified-javascript`, `legacy-javascript-insight`, `duplicated-javascript-insight`, `bootup-time`, `unused-css-rules`, `unminified-css`. `script-treemap-data` in the `.lh.json` report holds the size of each module inside each script.
+
 ## Measure first
 
-- `python3 scripts/measure.py bundle <build dir>`: JS and CSS size, raw and gzip.
-- What is inside: the bundler's analyzer (`vite-bundle-visualizer` / `rollup-plugin-visualizer`, `@next/bundle-analyzer`, `webpack-bundle-analyzer`, `source-map-explorer` on the built JS). Use `npx` for a one-off run; do not add it as a dependency unless the user wants it.
-- Lighthouse audits in the saved report: unused JavaScript, legacy JavaScript, duplicated modules.
+- `python3 scripts/measure.py bundle <generated output>` (Vite: `dist/assets`; Next: `.next/static`): JS and CSS size, raw and gzip, and the largest files. Do not point it at a folder that also holds copies of `public/`: unused static files there say nothing about page weight.
+- What is inside: `script-treemap-data` above, or the bundler's analyzer (`vite-bundle-visualizer` / `rollup-plugin-visualizer`, `@next/bundle-analyzer`, `webpack-bundle-analyzer`, `source-map-explorer` on the built JS). Use `npx` for a one-off run; do not add it as a dependency unless the user wants it.
+- On a small app, unused JavaScript is often the framework runtime itself. Splitting then gains little; say so rather than ranking it high.
 
 ## Common causes, by frequency
 
