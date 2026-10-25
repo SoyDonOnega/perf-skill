@@ -12,6 +12,7 @@ Goal: fewer requests, smaller responses, nothing fetched twice, nothing waiting 
 - In a browser: the network log of the key flow. Count requests, find duplicates (same URL or same query fired twice), and draw the waterfall (which request waits on which).
 - Server response time (TTFB) for the document and the main API calls.
 - **Caching and compression are a deployment property.** Local preview servers usually send `no-cache` and their own compression, so `cache-insight` passes or finds nothing on localhost. Check the public site read-only: `curl -sI <public URL of a hashed asset>` and `curl -sI -H 'Accept-Encoding: br, gzip' <public URL>`. Findings from this are marked "Verifiable by compare: no" and get an after-deploy check instead.
+  - Protected preview deployments (for example Vercel Authentication, Netlify password protection) answer with a redirect or `401` to the login page, so their headers are not the asset's. A `3xx` or `401` from `curl -sI` means the check cannot run there: do not bypass the protection; give the check for production, after the user merges and deploys.
 
 ## Common causes, by frequency
 
