@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Measure a target with a platform profile (median of N runs) and compare two measurements.
-Standard library only. Each profile needs its own tools (web: Node and Google Chrome).
+Standard library only. Each profile needs its own tools (web: Node and Google Chrome; apple: macOS with Xcode).
 
 Usage:
     python3 measure.py run [--profile web] <target> [profile options] --out FILE
@@ -10,6 +10,8 @@ Usage:
 Profiles (scripts/profile_<name>.py):
     web      run <url> [--runs 3] [--preset mobile|desktop] [--dist DIR]: Lighthouse, full report
              of the median run kept as <FILE stem>.lh.json.
+    apple    run <path.app> [--mode launch|idle|size] [--device UDID] [--runs 3] [--settle 10]
+             [--window 60]: macOS app or iOS Simulator app, measured with ps, top and footprint.
 
 run      Writes FILE: the profile, metadata, the metrics of the median run, the spread over all
          runs, warnings, and the profile's findings. Every metric in "metrics" comes from one
@@ -56,6 +58,12 @@ def fmt(value, unit, floor):
         return f"{value / 1024:.1f} KB"
     if unit == "ms":
         return f"{value:.0f} ms"
+    if unit == "MB":
+        return f"{value:.1f} MB"
+    if unit == "%":
+        return f"{value:.2f} %"
+    if unit == "/s":
+        return f"{value:.1f}/s"
     return f"{value:.3f}" if floor < 1 else f"{value:g}"
 
 

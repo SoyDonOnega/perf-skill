@@ -4,7 +4,7 @@ Agent skill `/perf`: make an app faster by measurement — baseline, one change 
 
 ## What it does
 
-Detects the platform and picks its measurement profile (today: `web`; a platform with no profile is reported, not forced into one). Reads the stack and the project's own constraints (README, handoff and agent notes), builds the app for production, serves it locally on a fixed port and takes a Lighthouse baseline (median of 3 runs, full report kept, failing audits summarised) plus build size. Audits five areas — unnecessary renders, bundle size and lazy loading, requests and caching, slow queries and N+1, images/fonts/third-party scripts — and returns ranked findings with evidence. After you choose which to apply, it makes one change at a time on a `perf/<date>` branch, rebuilds, runs the tests, re-measures, and keeps the change only if the targeted metric improved with no regression. Ends with a before/after report. It never deploys, pushes or touches production.
+Detects the platform and picks its measurement profile (`web`, or `apple` for native macOS and iOS apps; a platform with no profile is reported, not forced into one). Reads the stack and the project's own constraints (README, handoff and agent notes), builds the app for production, serves it locally on a fixed port and takes a Lighthouse baseline (median of 3 runs, full report kept, failing audits summarised) plus build size. Audits five areas — unnecessary renders, bundle size and lazy loading, requests and caching, slow queries and N+1, images/fonts/third-party scripts — and returns ranked findings with evidence. After you choose which to apply, it makes one change at a time on a `perf/<date>` branch, rebuilds, runs the tests, re-measures, and keeps the change only if the targeted metric improved with no regression. Ends with a before/after report. It never deploys, pushes or touches production.
 
 ## Usage
 
@@ -12,6 +12,7 @@ Detects the platform and picks its measurement profile (today: `web`; a platform
 /perf ~/code/my-app
 /perf --audit https://staging.example.com
 /perf --area bundle,assets ~/code/my-app
+/perf --audit ~/code/my-mac-app
 ```
 
 Output: a *Plan* (stack, baseline table, ranked findings, skipped areas, proposed order), then — after your OK — a *Report* (baseline vs final, each change kept or reverted with its numbers, caveats).
@@ -22,16 +23,18 @@ From OneStack: `./sync-install.sh` — or copy this folder as `<skills dir>/perf
 
 ## Requirements
 
-- git, Node (`npx`), Google Chrome, Python 3.
-- Lighthouse is fetched by `npx` on first run (pinned version; network needed once).
+- git, Python 3.
+- Web profile: Node (`npx`), Google Chrome. Lighthouse is fetched by `npx` on first run (pinned version; network needed once).
+- Apple profile: a Mac with Xcode; an iOS Simulator runtime for iOS apps. No sudo, no Instruments needed for the measured numbers.
 - Optional, used only if your agent already has them: Chrome DevTools, Playwright and Sentry MCP servers. The skill works without them.
 
 ## Layout
 
 - `SKILL.md` — the skill: the platform-neutral measure → change → re-measure loop, rules, output templates, profile table.
 - `scripts/measure.py` — `run --profile <p>` (median run of N, warnings, findings), `bundle` (generated output size by type plus largest files), `compare` (before/after table driven by the profile's metric registry; exit 1 on regression). Standard library only.
-- `scripts/profiles.py` — profile registry; `scripts/profile_web.py` — web profile: Lighthouse (pinned), full report kept as `.lh.json`, observed LCP and LCP element.
+- `scripts/profiles.py` — profile registry; `scripts/profile_web.py` — web profile: Lighthouse (pinned), full report kept as `.lh.json`, observed LCP and LCP element; `scripts/profile_apple.py` — apple profile: launches a built `.app` (macOS or iOS Simulator) and reads `ps`, `top` and `footprint` in modes `launch`, `idle`, `size`.
 - `references/core/metrics.md` — result file contract, metric registry, how to add a profile.
+- `references/apple/profile.md` — apple profile guide; `references/apple/launch.md`, `idle.md`, `responsiveness.md`, `memory.md`, `network-data.md`, `size-assets.md` — per-area checklists.
 - `references/web/profile.md` — web profile guide; `references/web/renders.md`, `bundle.md`, `network.md`, `db.md`, `assets.md` — per-area checklists: Lighthouse 13 audit IDs, how to measure, common causes, fixes, pitfalls.
 
 ## License
