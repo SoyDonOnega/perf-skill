@@ -10,7 +10,7 @@ Each profile module exposes:
 import importlib
 import sys
 
-PROFILES = ("web",)
+PROFILES = ("web", "apple")
 DEFAULT_PROFILE = "web"
 
 

@@ -2,11 +2,11 @@
 name: perf
 description: >-
   Makes an app faster by measurement: detects the platform, picks the matching measurement
-  profile (web: Lighthouse), takes a baseline, audits that profile's areas, then applies one
+  profile (web: Lighthouse; apple: macOS and iOS Simulator apps), takes a baseline, audits that profile's areas, then applies one
   change at a time, re-measures, and keeps or reverts each change. Use when the user runs
   /perf <repo path or URL>.
 license: MIT
-compatibility: Requires git and Python 3 (or uv). Each profile adds its own tools; web needs Node (npx), Google Chrome and network on the first run to fetch Lighthouse.
+compatibility: Requires git and Python 3 (or uv). Each profile adds its own tools; web needs Node (npx), Google Chrome and network on the first run to fetch Lighthouse; apple needs macOS with Xcode.
 argument-hint: "[--audit] [--area <areas>] <repo path or URL>"
 disable-model-invocation: true
 ---
@@ -22,6 +22,7 @@ Paths in this file are relative to the skill root (the folder that contains this
 | Profile | Covers | Guide |
 |---|---|---|
 | web | Web apps and sites (SPA, SSR, static), measured in a browser | `references/web/profile.md` |
+| apple | Native macOS and iOS apps built with Xcode; iOS in the Simulator | `references/apple/profile.md` |
 
 Read only the guide of the profile in use. A project that matches no profile: tell the user which platform recon found and that no profile covers it yet, and stop. Never force a profile onto a platform it does not describe (for example web metrics on a native app).
 
@@ -127,12 +128,15 @@ Read only the guide of the profile in use. A project that matches no profile: te
 ## Resources
 
 - `scripts/measure.py` — `run --profile <profile>` (median run of N, warnings, findings; contract in `references/core/metrics.md`), `bundle` (generated output size by type plus largest files), `compare` (before/after table; a metric moves only past a relative threshold, an absolute floor and with non-overlapping run ranges; exit 1 on regression).
-- `scripts/profiles.py` — profile registry; `scripts/profile_<name>.py` — one measurement module per profile (`profile_web.py`: Lighthouse).
+- `scripts/profiles.py` — profile registry; `scripts/profile_<name>.py` — one measurement module per profile (`profile_web.py`: Lighthouse; `profile_apple.py`: ps, top and footprint in modes `launch`, `idle`, `size`).
 - `references/core/metrics.md` — result file contract, metric registry, how to add a profile.
 - `references/web/profile.md` — web profile: detect, recon, release build, baseline, areas, plan columns, rules.
 - `references/web/renders.md`, `bundle.md`, `network.md`, `db.md`, `assets.md` — web areas.
+- `references/apple/profile.md` — apple profile: detect, recon (app kind, Release flags, timers), Release build and signing, baseline modes, areas, plan columns, rules.
+- `references/apple/launch.md`, `idle.md`, `responsiveness.md`, `memory.md`, `network-data.md`, `size-assets.md` — apple areas.
 
 ## Harness notes
 
 - Claude Code desktop app: use the built-in browser to check web flows and read the Performance API (`performance.getEntriesByType(...)`) when a metric needs a real interaction.
+- Claude Code desktop app, apple profile: the iOS Simulator panel can show the app the user is asked to interact with while a trace records.
 - Optional MCP servers, used only if already configured in the session; the skill never installs them: Chrome DevTools MCP (performance traces, INP on a scripted interaction), Playwright MCP (scripted flows), Sentry MCP (field performance and slow transactions, read only).
